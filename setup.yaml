@@ -74,17 +74,5 @@ spec:
   name: ibm-appconnect
   source: ibm-operator-catalog
   sourceNamespace: openshift-marketplace
----
-# install WAS Liberty Operator
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: was-liberty
-  namespace: demo
-spec:
-  installPlanApproval: Automatic
-  name: ibm-websphere-liberty
-  source: ibm-operator-catalog
-  sourceNamespace: openshift-marketplace
 ...
 
