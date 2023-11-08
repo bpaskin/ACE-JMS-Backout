@@ -6,7 +6,7 @@
     <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/ace-jms-backout/icons/full/obj16/BOQEvents.gif"/>
     <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/ace-jms-backout/icons/full/obj30/BOQEvents.gif"/>
     <composition>
-      <nodes xmi:type="ComIbmJMSClientInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="30,10" sourceQueueName="InputQ2" locationJndiBindings="file:///home/aceuser/jms" connectionFactoryName="CF1" transactionMode="yes">
+      <nodes xmi:type="ComIbmJMSClientInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="30,10" sourceQueueName="InputQ2" locationJndiBindings="file:///home/aceuser/jms" connectionFactoryName="CF1" backoutDestination="InputQ3" transactionMode="yes">
         <translation xmi:type="utility:ConstantString" string="BOQ Process"/>
       </nodes>
       <nodes xmi:type="ComIbmJMSClientOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="450,10" destinationQueueName="InputQ3" locationJndiBindings="file:///home/aceuser/jms" connectionFactoryName="CF1" transactionMode="yes">
