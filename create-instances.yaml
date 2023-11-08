@@ -1,0 +1,1384 @@
+---
+# create platform navigator instance
+apiVersion: integration.ibm.com/v1beta1
+kind: PlatformNavigator
+metadata:
+   name: platform-navigator
+   namespace: demo
+spec:
+   license: 
+      accept: true
+      license: L-YBXJ-ADJNSM
+   replicas: 1
+   version: 2023.2.1
+   storage:
+     class: 'ocs-storagecluster-cephfs'
+---
+# Create ACE Dashboard
+apiVersion: appconnect.ibm.com/v1beta1
+kind: Dashboard
+metadata:
+  name: ace-dashboard
+  namespace: demo
+spec:
+  license:
+    accept: true
+    license: L-MJTK-WUU8HE
+    use: CloudPakForIntegrationNonProduction
+  pod:
+    containers:
+      content-server:
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
+      control-ui:
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 125Mi
+  storage:
+    size: 5Gi
+    type: persistent-claim
+    class: ocs-storagecluster-cephfs
+  replicas: 1
+  useCommonServices: true
+  version: 12.0.8
+---
+# ACE Designer
+apiVersion: appconnect.ibm.com/v1beta1
+kind: DesignerAuthoring
+metadata:
+  name: ace-designer
+  namespace: demo
+spec:
+  license:
+    accept: true
+    license: L-SEWB-GH63KR
+    use: CloudPakForIntegrationNonProduction
+  couchdb:
+    storage:
+      size: 10Gi
+      type: persistent-claim
+      class: ocs-storagecluster-cephfs
+    replicas: 1
+  designerMappingAssist:
+    incrementalLearning:
+      schedule: Every 15 days
+    enabled: true
+  designerFlowsOperationMode: local
+  replicas: 1
+  useCommonServices: true
+  version: 12.0.9-r3
+---
+# create MQ secrets for the key/trust store
+kind: Secret
+apiVersion: v1
+metadata:
+  name: mq-tls
+  namespace: demo
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURDVENDQWZHZ0F3SUJBZ0lVR0tiaE5ZWXJMZVdqUFBVTlp5RldJTjJQWExRd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0ZERVNNQkFHQTFVRUF3d0piRzlqWVd4b2IzTjBNQjRYRFRJd01ERXdOakV3TURjeU4xb1hEVE13TURFdwpNekV3TURjeU4xb3dGREVTTUJBR0ExVUVBd3dKYkc5allXeG9iM04wTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGCkFBT0NBUThBTUlJQkNnS0NBUUVBem5EbkpGaHhFMGRMTFdhOUZZQlBvakZNdWVSL1pESXJZTEE0OGFWYVNNYU8KRjhNT0o0RGpHQWJ1L0UwbjlIR3JxSXI5bnRSc29SZkhjMFdhcExDcFdwdXdnWlBFSXVXR25MS2xjdVJtYnRVVApUUlkvQkhITEtrVUFncnlCUXVqZFh2RFRobnltYXZCUGpLM1QxZlZFMGNFT1lHQTlHanJYU0IzT2hQR1pHQmxOCmM5NXppZEZSOVZyWHQwRFJDVkFrNjRmYlRoa3V2SDh1TkV1VGFodlVFOVJIZmRzajJzZU81S0k3bmdYMG1IUUIKcUlMdVAzcGEreU1WNUc4TlBaalN4U0IwQjNlS3YraUNjV2hSdTZSRmIyZmNmZXpnbm1TcFJYVTUwS1lxV1piZApvc0czaFFxU1JRUTJZUmR5NzZaMGJKb3FGM3N0aGJJaTZ5TmYvTVQ5ZndJREFRQUJvMU13VVRBZEJnTlZIUTRFCkZnUVVIQlBGY0FyTy9ZUmxiZ0tobmkxSVdnS0Z5VEF3SHdZRFZSMGpCQmd3Rm9BVUhCUEZjQXJPL1lSbGJnS2gKbmkxSVdnS0Z5VEF3RHdZRFZSMFRBUUgvQkFVd0F3RUIvekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBWkZ6SQpaLzZOay9TQmY0WXJHdVdNSzVjTTRLdldjWUdXQWlndTZ1TzZvV2VUVmdYamtGbE9GZ2RHRVhpSjFZNi9mRFBCCitaMVE0SERMYm1hbGE1aXRqeVhXbWFsRTFFOHR2bThGMDA5ZEFPL0oxUmNyS1VZcUFKbGJQNTZtbmt1QmtqZE0KYzAyMkhXOTd0RUpkYXViTlF2ZWJraDhZK1loUGVkV242ZmFtMVM1S2cwYUlVUWRKd0FuZDlCb2hLVkk3SHFFZgpoUktDYmJFZzNySXlSS0FLdk5DRXlvMjY4b3VIcll3Mi9WMEhMU0VnWEU3UTFxWTVKaXF6Y3Iyb0EvU2xZdGZwCnZYZFhKajA3OGJ1N3hrS2FxZkxpN3FTSzdjSVRjWjNWcldGOWZCbEh5MVV1K2V1NVNhN29udFR2MktON2Joc1QKNGczVTlMdWR2L01xTE5EWDVnPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRRE9jT2NrV0hFVFIwc3QKWnIwVmdFK2lNVXk1NUg5a01pdGdzRGp4cFZwSXhvNFh3dzRuZ09NWUJ1NzhUU2YwY2F1b2l2MmUxR3loRjhkegpSWnFrc0tsYW03Q0JrOFFpNVlhY3NxVnk1R1p1MVJOTkZqOEVjY3NxUlFDQ3ZJRkM2TjFlOE5PR2ZLWnE4RStNCnJkUFY5VVRSd1E1Z1lEMGFPdGRJSGM2RThaa1lHVTF6M25PSjBWSDFXdGUzUU5FSlVDVHJoOXRPR1M2OGZ5NDAKUzVOcUc5UVQxRWQ5MnlQYXg0N2tvanVlQmZTWWRBR29ndTQvZWxyN0l4WGtidzA5bU5MRklIUUhkNHEvNklKeAphRkc3cEVWdlo5eDk3T0NlWktsRmRUblFwaXBabHQyaXdiZUZDcEpGQkRaaEYzTHZwblJzbWlvWGV5MkZzaUxyCkkxLzh4UDEvQWdNQkFBRUNnZ0VBQ0czcndqd3FRZE5EYXBNclhWbGo1d2VFVG9MYUFNbGJwQk1PQUMvMFE4eDMKdU5pcUYwclgrdjh0ZXZmYmpjdW1hcmRpSzc0WXdXc3JKYlhOM3JPbjlwOHMwZDJxd0pJR3NSZEtVaXFwVkJVMwpPSXFVQUNaMVdVQ0FDTmFSb0ozSmpEcmhLRGltd3U4VkVIVjRsTi95ODIyaW5LVFJXZVRWTFlpcUNodWpXS3g5CkNvUU9qeFpkZFFxV0xNbEtndFRQOGUxSTI2MmNUbVhzVzhhSWQ4dDVpWUZmcFc2OHpLTzZqSmRVWktpdnE2MkcKc3hqYnF5Kzk1SitqbzBLeWUybzN0M2NFempJUEk4L1hhRmllTlFFTUZtRWVlVzVSNE1iZ3VNblpocTBVV1BzSwpWdHE0Ukp2OW02aC9RWGlqMGVCY281Rnp2MFB5RHZtUFkrZWUwT1plQVFLQmdRRHBQUm9wanpMYjhFRnUzcnU2Cktyc1BNYzUvbUc4S1pmY0NGejdjSHRQdTJEQzZxTytpRXhkVk5xZ2h6ZGtLK05kalFGUGNmdlRQZXhCOWhsWUEKN0NtOE1QRkxSNUhNditFL3BSQm5UNzVLZHdhT2NjT21ibFNGSE1LSjhJVXZld3daaERhQWFFWlNmQld0TU9GdwpKa0FrTDdMTWxkL0Ixbk9LaDM5YmR1ZEpRUUtCZ1FEaWxsT3ZGVkVjaUxyM28yR1JzUnhIK1lMQkJjbUZpSEo2CngzQ1JNQjRPMldZMjJPYXpsZVJZUXdqdU1PS2xGNmNiR0VBR1JKaVRIbGo2MFE0cXVwbERrbVJTdWVJcnBRMTEKU3A1MnMranY3WXpZdFpxUG00UzFtaG9xcU1iRDg2V2VEZnp6RUIweWJPUk8xZW04NXRqZStoN3FvN0Y5QWUrSwplU29TUDduV3Z3S0JnQUpTQlV5Y2pCajhEdXFYZEs2cGRpcjBoK1ZsRXRXN3BmVnpYY0M2M2NqbWhiV1ZzS3lnCkcvOVJCK011TlJhUzJ6RzFsaC8vYzFnTkZXRHFVVGk1SU1FcWkzd0FQa2NYTVpwOGZlbEpOYzl2MTdUYkZPTTIKL2NoRlBQbzZWbGplbElROGVINVdpenlPMTNoZG9DQ0pnT0hiUjZBWmJaeDBFYm96RnVWR0RZOEJBb0dBUCs1QQpRRWNZY3ArVmVTZU04T2x5M0UvbTk0VWxmZHFveWtHWlhpMmdYWG96WDhoRkYyaDBXLzdWOXphdHkvem5kanFhClhlcGV6aXVpMlduQXdJZVRsTUFxTkRra09rSkFrTlp6N1hRSGhpS1ZPZFBMZnpkVzgxSStqY2kvQkN5cmp2UE4KYWRzakVjWXRpSnpNYlRNSS82aThybUZ2UTZFWE1BL05zZ1p1N2NzQ2dZRUFpN2RWYzhkNmNUUVFKR05HL0l4Vwo2d1dJN1U3V094OTNVTlFEZGVyQUhNeFRBMXRKbHdTRmtNUzYrWXAvZzU0K0tTQWZLTWw4eDVUTnRxM1lpUEdiCkozOGtVU2lxV2VudFYzeExMVmJMRTRUYXgxbkptK0ZFNDV4VWxwYjJyTU5kYjFuOFpOdkVrTTJsRElUMHBKOWUKU3EvWkZXMG1jSGdjVWRpdm93WHJLNVE9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K
+type: Opaque
+---
+# ConfigMap for the QMGRs
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: mq-mqsc
+  namespace: demo
+data:
+  mqsc: |
+    DEFINE QLOCAL(IN.Q) BOQNAME(IN.Q.BOQ) BOTHRESH(3) DEFPSIST(YES)
+    DEFINE QLOCAL(IN.Q.BOQ) DEFPSIST(YES)
+    DEFINE QLOCAL(WORK.Q) DEFPSIST(YES)
+    DEFINE CHANNEL(EXTERNAL.SVRCONN) CHLTYPE(SVRCONN) TRPTYPE(TCP) 
+    SET CHLAUTH(EXTERNAL.SVRCONN) TYPE(BLOCKUSER) USERLIST(NOBODY)
+    ALTER AUTHINFO(SYSTEM.DEFAULT.AUTHINFO.IDPWOS) AUTHTYPE(IDPWOS) CHCKCLNT(NONE)
+    REFRESH SECURITY TYPE(CONNAUTH)
+---
+# QMGR 
+apiVersion: mq.ibm.com/v1beta1
+kind: QueueManager
+metadata:
+  namespace: demo
+  name: qm1
+spec:
+  license:
+    accept: true
+    license: L-YBXJ-ADJNSM
+    use: NonProduction
+  web:
+    enabled: true
+  version: 9.3.3.2-r1
+  template:
+    pod:
+      containers:
+        - env:
+            - name: MQSNOAUT
+              value: 'yes'
+          name: qmgr
+  queueManager:
+    name: QM1
+    mqsc:
+      - configMap:
+          items:
+            - mqsc
+          name: mq-mqsc
+    availability:
+      type: SingleInstance
+    storage:
+      queueManager:
+        type: persistent-claim
+      defaultClass: ocs-storagecluster-cephfs
+#  pki:
+#    keys:
+#    - name: default
+#      secret:
+#        secretName: mq-tls
+#        items:
+#          - tls.key
+#          - tls.crt
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: jms.bindings
+  namespace: demo
+data:
+  .bindings: >
+    #This file is used by the JNDI FSContext.
+
+    #Tue Nov 07 13:23:52 EST 2023
+
+    CF1/RefAddr/125/Type=XMSC_WMQ_SSL_CIPHER_SUITE
+
+    InputQ/RefAddr/6/Content=273
+
+    CF1/RefAddr/73/Content=0
+
+    CF1/RefAddr/100/Type=XMSC_WMQ_TEMP_Q_PREFIX
+
+    CF1/RefAddr/99/Encoding=String
+
+    InputQ2/RefAddr/19/Encoding=String
+
+    CF1/RefAddr/58/Type=XMSC_WMQ_CHANNEL
+
+    CF1/RefAddr/70/Content=1
+
+    CF1/RefAddr/82/Encoding=String
+
+    CF1/RefAddr/33/Type=BCON
+
+    CF1/RefAddr/119/Encoding=String
+
+    CF1/RefAddr/85/Type=XMSC_CONNECTION_TYPE_NAME
+
+    CF1/RefAddr/48/Encoding=String
+
+    CF1/RefAddr/60/Type=XMSC_WMQ_USE_CONNECTION_POOLING
+
+    CF1/RefAddr/102/Encoding=String
+
+    CF1/RefAddr/69/Content=0
+
+    InputQ3/RefAddr/20/Encoding=String
+
+    CF1/RefAddr/20/Content=0
+
+    CF1/RefAddr/31/Encoding=String
+
+    InputQ2/RefAddr/2/Content=-2
+
+    InputQ/RefAddr/5/Type=TC
+
+    InputQ3/RefAddr/6/Content=273
+
+    CF1/RefAddr/112/Type=XMSC_WMQ_PUB_ACK_INTERVAL
+
+    CF1/RefAddr/16/Content=false
+
+    CF1/RefAddr/18/Type=PINT
+
+    InputQ2/RefAddr/8/Type=WCFMT
+
+    CF1/RefAddr/13/Content=1
+
+    CF1/RefAddr/93/Encoding=String
+
+    CF1/RefAddr/45/Type=SSUBS
+
+    InputQ2/RefAddr/13/Encoding=String
+
+    CF1/RefAddr/97/Type=XMSC_WMQ_MAP_NAME_STYLE
+
+    CF1/RefAddr/20/Type=WCFMT
+
+    CF1/RefAddr/6/Type=CCS
+
+    CF1/RefAddr/72/Type=XMSC_WMQ_OUTCOME_NOTIFICATION
+
+    CF1/RefAddr/59/Encoding=String
+
+    CF1/RefAddr/113/Encoding=String
+
+    InputQ3/RefAddr/17/Type=QMGR
+
+    CF1/RefAddr/54/Encoding=String
+
+    InputQ2/RefAddr/19/Type=UMR
+
+    CF1/RefAddr/85/Content=com.ibm.msg.client.wmq
+
+    CF1/RefAddr/82/Content=1800
+
+    InputQ3/RefAddr/2/Type=PRI
+
+    InputQ/RefAddr/12/Content=0
+
+    InputQ/RefAddr/22/Type=RCNV
+
+    CF1/RefAddr/124/Encoding=String
+
+    CF1/RefAddr/32/Content=1
+
+    InputQ3/RefAddr/5/Encoding=String
+
+    InputQ2/RefAddr/5/Encoding=String
+
+    CF1/RefAddr/78/Content=5000
+
+    CF1/RefAddr/19/Encoding=String
+
+    CF1/RefAddr/65/Encoding=String
+
+    CF1/RefAddr/126/Type=XMSC_CONNECTION_TYPE
+
+    InputQ3/RefAddr/21/Content=1208
+
+    CF1/RefAddr/101/Type=XMSC_WMQ_SEND_EXIT_INIT
+
+    InputQ2/RefAddr/21/Content=1208
+
+    InputQ2/RefAddr/0/Encoding=String
+
+    CF1/RefAddr/28/Content=1800
+
+    CF1/RefAddr/59/Type=failIfQuiesce
+
+    CF1/RefAddr/14/Encoding=String
+
+    CF1/RefAddr/25/Content=true
+
+    CF1/RefAddr/34/Type=BPUB
+
+    CF1/RefAddr/86/Type=XMSC_WMQ_MAX_BUFFER_SIZE
+
+    CF1/RefAddr/61/Type=XMSC_WMQ_BROKER_CONTROLQ
+
+    InputQ/RefAddr/16/Encoding=String
+
+    CF1/RefAddr/9/Content=NONE 
+
+    InputQ3/RefAddr/17/Content=QM1
+
+    InputQ2/RefAddr/17/Content=QM1
+
+    CF1/RefAddr/111/Content=1
+
+    CF1/RefAddr/6/Content=819
+
+    InputQ3/RefAddr/19/Encoding=String
+
+    InputQ/RefAddr/6/Type=ENC
+
+    InputQ/RefAddr/11/Encoding=String
+
+    CF1/RefAddr/76/Encoding=String
+
+    CF1/RefAddr/51/Content=0
+
+    CF1/RefAddr/97/Content=true
+
+    CF1/RefAddr/113/Type=XMSC_WMQ_CONNECT_OPTIONS
+
+    CF1/RefAddr/19/Type=PVER
+
+    InputQ2/RefAddr/9/Type=MBODY
+
+    CF1/RefAddr/107/Content=1
+
+    CF1/RefAddr/46/Type=MCAST
+
+    CF1/RefAddr/25/Encoding=String
+
+    CF1/RefAddr/98/Type=XMSC_WMQ_SYNCPOINT_ALL_GETS
+
+    CF1/RefAddr/21/Type=MBS
+
+    InputQ2/RefAddr/20/Type=RTOST
+
+    CF1/RefAddr/7/Type=MNS
+
+    CF1/RefAddr/73/Type=wildcardFormat
+
+    CF1/RefAddr/47/Content=443
+
+    InputQ/RefAddr/0/Encoding=String
+
+    CF1/RefAddr/44/Content=0
+
+    InputQ3/RefAddr/18/Type=UMA
+
+    CF1/RefAddr/2/Encoding=String
+
+    InputQ/RefAddr/22/Encoding=String
+
+    CF1/RefAddr/87/Encoding=String
+
+    InputQ3/RefAddr/20/Type=RTOST
+
+    InputQ3/RefAddr/13/Encoding=String
+
+    CF1/RefAddr/70/Encoding=String
+
+    CF1/RefAddr/107/Encoding=String
+
+    InputQ3/RefAddr/3/Type=PER
+
+    InputQ/RefAddr/3/Content=-2
+
+    CF1/RefAddr/36/Encoding=String
+
+    InputQ/RefAddr/0/Content=7
+
+    CF1/RefAddr/126/Content=1
+
+    InputQ2/FactoryName=com.ibm.mq.jms.MQQueueFactory
+
+    CF1/RefAddr/127/Type=XMSC_WMQ_SECURITY_EXIT
+
+    CF1/RefAddr/98/Encoding=String
+
+    InputQ2/RefAddr/18/Encoding=String
+
+    CF1/RefAddr/102/Type=XMSC_WMQ_TEMPORARY_MODEL
+
+    CF1/RefAddr/60/Content=true
+
+    InputQ3/RefAddr/3/Content=-2
+
+    CF1/RefAddr/81/Encoding=String
+
+    CF1/RefAddr/119/Content=unspecified
+
+    CF1/RefAddr/118/Encoding=String
+
+    CF1/RefAddr/35/Type=BSUB
+
+    InputQ3/RefAddr/0/Content=7
+
+    CF1/RefAddr/87/Type=XMSC_WMQ_BROKER_QMGR
+
+    CF1/RefAddr/10/Type=CT
+
+    CF1/RefAddr/47/Encoding=String
+
+    CF1/RefAddr/101/Encoding=String
+
+    InputQ3/FactoryName=com.ibm.mq.jms.MQQueueFactory
+
+    CF1/RefAddr/62/Type=XMSC_WMQ_QUEUE_MANAGER
+
+    CF1/RefAddr/59/Content=1
+
+    InputQ/RefAddr/10/Type=MDR
+
+    CF1/RefAddr/10/Content=\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000
+
+    CF1/RefAddr/56/Content=true
+
+    CF1/RefAddr/42/Encoding=String
+
+    InputQ/RefAddr/7/Type=FIQ
+
+    CF1/RefAddr/114/Type=XMSC_ADMIN_OBJECT_TYPE
+
+    CF1/RefAddr/92/Encoding=String
+
+    InputQ2/RefAddr/12/Encoding=String
+
+    CF1/RefAddr/47/Type=PPORT
+
+    CF1/RefAddr/99/Type=XMSC_WMQ_OPT_PUB
+
+    CF1/RefAddr/22/Type=FIQ
+
+    CF1/RefAddr/58/Encoding=String
+
+    InputQ2/RefAddr/21/Type=RCCS
+
+    CF1/RefAddr/8/Type=HC
+
+    CF1/RefAddr/112/Encoding=String
+
+    CF1/RefAddr/74/Type=XMSC_CLIENT_ID
+
+    InputQ3/RefAddr/19/Type=UMR
+
+    CF1/RefAddr/53/Encoding=String
+
+    InputQ/RefAddr/8/Content=0
+
+    CF1/RefAddr/75/Content=1
+
+    InputQ3/RefAddr/21/Type=RCCS
+
+    InputQ3/RefAddr/9/Encoding=String
+
+    InputQ3/RefAddr/4/Type=CCS
+
+    CF1/RefAddr/69/Encoding=String
+
+    CF1/RefAddr/123/Encoding=String
+
+    CF1/RefAddr/22/Content=1
+
+    InputQ2/RefAddr/7/Content=1
+
+    InputQ2/RefAddr/4/Encoding=String
+
+    InputQ3/RefAddr/4/Encoding=String
+
+    InputQ2/RefAddr/4/Content=1208
+
+    CF1/RefAddr/64/Encoding=String
+
+    InputQ3/RefAddr/14/Content=-1
+
+    InputQ2/RefAddr/14/Content=-1
+
+    InputQ3/RefAddr/8/Content=0
+
+    CF1/RefAddr/3/Content=qm1-ibm-mq.demo.svc.cluster.local
+
+    CF1/RefAddr/128/Type=XMSC_WMQ_SPARSE_SUBSCRIPTIONS
+
+    InputQ3/RefAddr/11/Content=false
+
+    InputQ2/RefAddr/11/Content=false
+
+    CF1/RefAddr/18/Content=5000
+
+    CF1/RefAddr/103/Type=XMSC_WMQ_CLEANUP_INTERVAL
+
+    CF1/RefAddr/0/Content=7
+
+    CF1/RefAddr/13/Encoding=String
+
+    InputQ/RefAddr/5/Encoding=String
+
+    CF1/RefAddr/36/Type=CCSUB
+
+    CF1/RefAddr/94/Content=443
+
+    CF1/RefAddr/88/Type=XMSC_WMQ_TARGET_CLIENT_MATCHING
+
+    CF1/RefAddr/11/Type=CTO
+
+    InputQ2/RefAddr/10/Type=MDR
+
+    CF1/RefAddr/104/Content=false
+
+    InputQ/RefAddr/15/Encoding=String
+
+    CF1/RefAddr/91/Content=SYSTEM.JMS.ND.SUBSCRIBER.QUEUE
+
+    CF1/RefAddr/7/Encoding=String
+
+    InputQ/RefAddr/11/Type=MDW
+
+    InputQ/RefAddr/21/Content=1208
+
+    InputQ3/RefAddr/18/Encoding=String
+
+    InputQ/RefAddr/10/Encoding=String
+
+    CF1/RefAddr/75/Encoding=String
+
+    InputQ/RefAddr/8/Type=WCFMT
+
+    CF1/RefAddr/41/Content=1
+
+    CF1/RefAddr/87/Content=
+
+    CF1/RefAddr/115/Type=XMSC_WMQ_RECEIVE_EXIT
+
+    InputQ/RefAddr/17/Content=QM1
+
+    CF1/RefAddr/24/Encoding=String
+
+    CF1/RefAddr/48/Type=DAUTH
+
+    InputQ/RefAddr/14/Content=-1
+
+    CF1/RefAddr/23/Type=LA
+
+    InputQ2/RefAddr/22/Type=RCNV
+
+    CF1/RefAddr/37/Content=
+
+    CF1/RefAddr/9/Type=MC
+
+    CF1/RefAddr/75/Type=XMSC_WMQ_SHARE_CONV_ALLOWED
+
+    CF1/RefAddr/34/Content=SYSTEM.BROKER.DEFAULT.STREAM
+
+    CF1/RefAddr/50/Type=RCVISOL
+
+    CF1/RefAddr/1/Encoding=String
+
+    InputQ/RefAddr/21/Encoding=String
+
+    CF1/RefAddr/86/Encoding=String
+
+    InputQ3/RefAddr/22/Type=RCNV
+
+    CF1/RefAddr/106/Encoding=String
+
+    InputQ3/RefAddr/5/Type=TC
+
+    CF1/RefAddr/35/Encoding=String
+
+    CF1/RefAddr/116/Content=0
+
+    InputQ3/RefAddr/19/Content=63
+
+    InputQ2/RefAddr/0/Type=VER
+
+    CF1/RefAddr/113/Content=0
+
+    CF1/RefAddr/30/Encoding=String
+
+    CF1/RefAddr/53/Content=false
+
+    CF1/RefAddr/97/Encoding=String
+
+    InputQ2/RefAddr/17/Encoding=String
+
+    CF1/RefAddr/99/Content=false
+
+    CF1/RefAddr/104/Type=XMSC_WMQ_SSL_FIPS_REQUIRED
+
+    CF1/RefAddr/50/Content=0
+
+    CF1/RefAddr/80/Encoding=String
+
+    CF1/RefAddr/109/Content=60000
+
+    CF1/RefAddr/117/Encoding=String
+
+    CF1/RefAddr/37/Type=BQM
+
+    CF1/RefAddr/46/Encoding=String
+
+    CF1/RefAddr/100/Encoding=String
+
+    CF1/RefAddr/89/Type=XMSC_WMQ_SEND_CHECK_COUNT
+
+    CF1/RefAddr/12/Type=SCC
+
+    InputQ2/RefAddr/11/Type=MDW
+
+    CF1/RefAddr/49/Content=1000
+
+    InputQ/RefAddr/12/Type=MDCTX
+
+    CF1/RefAddr/46/Content=0
+
+    CF1/RefAddr/41/Encoding=String
+
+    InputQ/RefAddr/9/Type=MBODY
+
+    CF1/RefAddr/116/Type=XMSC_RTT_DIRECT_AUTH
+
+    CF1/RefAddr/91/Encoding=String
+
+    CF1/RefAddr/128/Encoding=String
+
+    InputQ/RefAddr/5/Content=0
+
+    CF1/RefAddr/72/Content=true
+
+    CF1/RefAddr/49/Type=MBSZ
+
+    InputQ2/RefAddr/9/Encoding=String
+
+    CF1/RefAddr/57/Encoding=String
+
+    CF1/RefAddr/111/Encoding=String
+
+    InputQ/RefAddr/2/Content=-2
+
+    CF1/RefAddr/24/Type=RINT
+
+    CF1/RefAddr/76/Type=XMSC_WMQ_BROKER_CC_SUBQ
+
+    CF1/RefAddr/128/Content=false
+
+    CF1/FactoryName=com.ibm.mq.jms.MQConnectionFactoryFactory
+
+    CF1/RefAddr/51/Type=PROCDUR
+
+    CF1/RefAddr/52/Encoding=String
+
+    CF1/RefAddr/68/Content=[B@5395680b
+
+    CF1/RefAddr/18/Encoding=String
+
+    CF1/RefAddr/65/Content=[0]
+
+    InputQ2/RefAddr/1/Content=-2
+
+    InputQ3/RefAddr/5/Content=0
+
+    InputQ3/RefAddr/6/Type=ENC
+
+    InputQ3/RefAddr/2/Content=-2
+
+    CF1/RefAddr/15/Content=false
+
+    CF1/RefAddr/68/Encoding=String
+
+    CF1/RefAddr/122/Encoding=String
+
+    CF1/RefAddr/12/Content=0
+
+    InputQ2/RefAddr/1/Type=EXP
+
+    InputQ3/RefAddr/3/Encoding=String
+
+    InputQ2/RefAddr/3/Encoding=String
+
+    CF1/RefAddr/63/Type=XMSC_WMQ_SECURITY_EXIT_INIT
+
+    CF1/RefAddr/90/Type=XMSC_WMQ_SSL_SOCKET_FACTORY
+
+    CF1/RefAddr/63/Encoding=String
+
+    InputQ/RefAddr/9/Encoding=String
+
+    CF1/RefAddr/29/Encoding=String
+
+    CF1/RefAddr/105/Type=XMSC_WMQ_SSL_PEER_NAME
+
+    InputQ3/RefAddr/10/Type=MDR
+
+    CF1/RefAddr/12/Encoding=String
+
+    InputQ/RefAddr/4/Encoding=String
+
+    CF1/RefAddr/38/Type=MSEL
+
+    CF1/RefAddr/13/Type=SCALD
+
+    CF1/RefAddr/79/Encoding=String
+
+    InputQ2/RefAddr/12/Type=MDCTX
+
+    CF1/RefAddr/81/Content=-1
+
+    CF1/RefAddr/6/Encoding=String
+
+    InputQ/RefAddr/13/Type=RACP
+
+    InputQ/RefAddr/11/Content=false
+
+    InputQ3/RefAddr/17/Encoding=String
+
+    CF1/RefAddr/74/Encoding=String
+
+    CF1/RefAddr/31/Content=
+
+    CF1/RefAddr/77/Content=1
+
+    CF1/RefAddr/117/Type=XMSC_WMQ_TEMP_TOPIC_PREFIX
+
+    InputQ/ClassName=com.ibm.mq.jms.MQQueue
+
+    InputQ3/RefAddr/12/Encoding=String
+
+    CF1/RefAddr/23/Encoding=String
+
+    InputQ3/RefAddr/20/Content=0
+
+    InputQ2/RefAddr/20/Content=0
+
+    CF1/RefAddr/27/Content=0
+
+    CF1/RefAddr/25/Type=TCM
+
+    CF1/RefAddr/77/Type=XMSC_WMQ_MESSAGE_RETENTION
+
+    CF1/RefAddr/24/Content=5000
+
+    InputQ2/RefAddr/9/Content=2
+
+    CF1/RefAddr/52/Type=NOTIFY
+
+    InputQ2/RefAddr/19/Content=63
+
+    CF1/RefAddr/0/Encoding=String
+
+    InputQ2/RefAddr/6/Content=273
+
+    CF1/RefAddr/8/Content=NONE 
+
+    InputQ2/RefAddr/16/Content=IN.Q.BOQ
+
+    InputQ3/RefAddr/16/Content=WORK.Q
+
+    InputQ/RefAddr/20/Encoding=String
+
+    CF1/RefAddr/85/Encoding=String
+
+    CF1/RefAddr/5/Content=EXTERNAL.SVRCONN
+
+    InputQ3/RefAddr/13/Content=2
+
+    CF1/ClassName=com.ibm.mq.jms.MQConnectionFactory
+
+    CF1/RefAddr/105/Encoding=String
+
+    CF1/RefAddr/34/Encoding=String
+
+    InputQ3/RefAddr/7/Type=FIQ
+
+    CF1/RefAddr/96/Content=0
+
+    CF1/RefAddr/106/Content=
+
+    InputQ2/RefAddr/2/Type=PRI
+
+    CF1/RefAddr/103/Content=3600000
+
+    CF1/RefAddr/64/Type=XMSC_WMQ_RECEIVE_ISOLATION
+
+    CF1/RefAddr/91/Type=XMSC_WMQ_BROKER_SUBQ
+
+    CF1/RefAddr/0/Type=VER
+
+    CF1/RefAddr/43/Content=3600000
+
+    CF1/RefAddr/96/Encoding=String
+
+    InputQ2/RefAddr/16/Encoding=String
+
+    CF1/RefAddr/40/Content=60000
+
+    CF1/RefAddr/106/Type=XMSC_WMQ_LOCAL_ADDRESS
+
+    CF1/RefAddr/116/Encoding=String
+
+    InputQ3/RefAddr/11/Type=MDW
+
+    InputQ/RefAddr/19/Content=63
+
+    CF1/RefAddr/45/Encoding=String
+
+    CF1/RefAddr/39/Type=PAI
+
+    InputQ2/RefAddr/11/Encoding=String
+
+    CF1/RefAddr/39/Content=25
+
+    CF1/RefAddr/14/Type=SRC
+
+    InputQ2/RefAddr/13/Type=RACP
+
+    InputQ/RefAddr/14/Type=RAALD
+
+    CF1/RefAddr/40/Encoding=String
+
+    InputQ2/ClassName=com.ibm.mq.jms.MQQueue
+
+    CF1/RefAddr/122/Content=qm1-ibm-mq.demo.svc.cluster.local(1414)
+
+    CF1/RefAddr/118/Type=multicast
+
+    CF1/RefAddr/127/Encoding=String
+
+    CF1/RefAddr/62/Content=QM1
+
+    InputQ3/RefAddr/8/Encoding=String
+
+    InputQ2/RefAddr/8/Encoding=String
+
+    CF1/RefAddr/56/Encoding=String
+
+    CF1/RefAddr/110/Encoding=String
+
+    InputQ2/RefAddr/22/Encoding=String
+
+    CF1/RefAddr/120/Type=XMSC_WMQ_SEND_EXIT
+
+    CF1/RefAddr/26/Type=AEX
+
+    CF1/RefAddr/118/Content=0
+
+    CF1/RefAddr/78/Type=XMSC_WMQ_RESCAN_INTERVAL
+
+    CF1/RefAddr/53/Type=OPTPUB
+
+    CF1/RefAddr/51/Encoding=String
+
+    CF1/RefAddr/58/Content=EXTERNAL.SVRCONN
+
+    CF1/RefAddr/80/Type=XMSC_WMQ_BROKER_PUBQ
+
+    CF1/RefAddr/17/Encoding=String
+
+    CF1/RefAddr/55/Content=0
+
+    InputQ/RefAddr/19/Encoding=String
+
+    InputQ3/RefAddr/8/Type=WCFMT
+
+    InputQ/RefAddr/0/Type=VER
+
+    CF1/RefAddr/67/Encoding=String
+
+    CF1/RefAddr/121/Encoding=String
+
+    InputQ2/RefAddr/2/Encoding=String
+
+    InputQ/RefAddr/14/Encoding=String
+
+    InputQ3/RefAddr/2/Encoding=String
+
+    InputQ2/RefAddr/3/Type=PER
+
+    CF1/RefAddr/65/Type=XMSC_WMQ_MSG_COMP
+
+    CF1/RefAddr/40/Type=SRI
+
+    CF1/RefAddr/62/Encoding=String
+
+    CF1/RefAddr/92/Type=XMSC_WMQ_CLIENT_RECONNECT_OPTIONS
+
+    InputQ/RefAddr/8/Encoding=String
+
+    CF1/RefAddr/1/Type=TRAN
+
+    CF1/RefAddr/28/Encoding=String
+
+    CF1/RefAddr/107/Type=XMSC_WMQ_SUBSCRIPTION_STORE
+
+    CF1/RefAddr/11/Encoding=String
+
+    InputQ3/RefAddr/12/Type=MDCTX
+
+    InputQ/RefAddr/3/Encoding=String
+
+    InputQ/RefAddr/7/Content=1
+
+    CF1/RefAddr/78/Encoding=String
+
+    CF1/RefAddr/71/Content=10
+
+    CF1/RefAddr/5/Encoding=String
+
+    CF1/RefAddr/15/Type=SFIPS
+
+    InputQ2/RefAddr/14/Type=RAALD
+
+    InputQ/RefAddr/15/Type=PAALD
+
+    InputQ3/RefAddr/16/Encoding=String
+
+    CF1/RefAddr/73/Encoding=String
+
+    CF1/RefAddr/21/Content=10
+
+    CF1/RefAddr/67/Content=0
+
+    CF1/RefAddr/39/Encoding=String
+
+    InputQ2/RefAddr/3/Content=-2
+
+    InputQ3/RefAddr/11/Encoding=String
+
+    InputQ2/RefAddr/13/Content=2
+
+    InputQ3/RefAddr/7/Content=1
+
+    CF1/RefAddr/119/Type=XMSC_WMQ_PROVIDER_VERSION
+
+    InputQ2/RefAddr/0/Content=7
+
+    CF1/RefAddr/22/Encoding=String
+
+    CF1/RefAddr/2/Content=QM1
+
+    InputQ3/RefAddr/10/Content=false
+
+    InputQ2/RefAddr/10/Content=false
+
+    CF1/RefAddr/17/Content=true
+
+    CF1/RefAddr/121/Type=XMSC_WMQ_QMGR_CCSID
+
+    CF1/RefAddr/27/Type=CROPT
+
+    CF1/RefAddr/14/Content=0
+
+    CF1/RefAddr/79/Type=XMSC_WMQ_CONNECTION_MODE
+
+    CF1/RefAddr/54/Type=CCDTURL
+
+    CF1/RefAddr/109/Encoding=String
+
+    CF1/RefAddr/81/Type=brokerVersion
+
+    CF1/RefAddr/84/Encoding=String
+
+    CF1/RefAddr/100/Content=
+
+    InputQ/RefAddr/20/Content=0
+
+    CF1/RefAddr/104/Encoding=String
+
+    CF1/RefAddr/89/Content=0
+
+    InputQ3/RefAddr/22/Encoding=String
+
+    CF1/RefAddr/33/Encoding=String
+
+    CF1/RefAddr/86/Content=1000
+
+    InputQ3/RefAddr/9/Type=MBODY
+
+    InputQ/RefAddr/1/Type=EXP
+
+    InputQ/RefAddr/16/Content=IN.Q
+
+    InputQ2/RefAddr/4/Type=CCS
+
+    InputQ/RefAddr/13/Content=2
+
+    CF1/RefAddr/66/Type=XMSC_RTT_PROXY_HOSTNAME
+
+    CF1/RefAddr/36/Content=SYSTEM.JMS.ND.CC.SUBSCRIBER.QUEUE
+
+    CF1/RefAddr/41/Type=SUBST
+
+    CF1/RefAddr/93/Type=XMSC_WMQ_RECEIVE_EXIT_INIT
+
+    CF1/RefAddr/33/Content=SYSTEM.BROKER.CONTROL.QUEUE
+
+    CF1/RefAddr/2/Type=QMGR
+
+    CF1/RefAddr/95/Encoding=String
+
+    InputQ2/RefAddr/15/Encoding=String
+
+    CF1/RefAddr/115/Encoding=String
+
+    CF1/RefAddr/108/Type=XMSC_WMQ_SSL_CERT_STORES_COL
+
+    InputQ3/RefAddr/13/Type=RACP
+
+    CF1/RefAddr/44/Encoding=String
+
+    CF1/RefAddr/90/Encoding=String
+
+    InputQ3/RefAddr/22/Content=1
+
+    InputQ2/RefAddr/22/Content=1
+
+    InputQ2/RefAddr/10/Encoding=String
+
+    CF1/RefAddr/29/Content=qm1-ibm-mq.demo.svc.cluster.local(1414)
+
+    InputQ/FactoryName=com.ibm.mq.jms.MQQueueFactory
+
+    CF1/RefAddr/16/Type=SPAG
+
+    InputQ2/RefAddr/15/Type=PAALD
+
+    InputQ/RefAddr/16/Type=QU
+
+    InputQ3/RefAddr/18/Content=REPORT
+
+    InputQ2/RefAddr/18/Content=REPORT
+
+    CF1/RefAddr/112/Content=25
+
+    CF1/RefAddr/7/Content=true
+
+    CF1/RefAddr/126/Encoding=String
+
+    CF1/RefAddr/52/Content=true
+
+    InputQ3/RefAddr/7/Encoding=String
+
+    InputQ2/RefAddr/7/Encoding=String
+
+    CF1/RefAddr/55/Encoding=String
+
+    CF1/RefAddr/98/Content=false
+
+    InputQ2/RefAddr/21/Encoding=String
+
+    CF1/RefAddr/122/Type=XMSC_WMQ_CONNECTION_NAME_LIST_INT
+
+    CF1/RefAddr/28/Type=CRT
+
+    CF1/RefAddr/55/Type=BVER
+
+    CF1/RefAddr/50/Encoding=String
+
+    CF1/RefAddr/48/Content=0
+
+    CF1/RefAddr/30/Type=TM
+
+    CF1/RefAddr/82/Type=XMSC_WMQ_CLIENT_RECONNECT_TIMEOUT
+
+    InputQ3/ClassName=com.ibm.mq.jms.MQQueue
+
+    CF1/RefAddr/16/Encoding=String
+
+    CF1/RefAddr/45/Content=false
+
+    InputQ/RefAddr/18/Encoding=String
+
+    InputQ/RefAddr/2/Type=PRI
+
+    InputQ/RefAddr/13/Encoding=String
+
+    InputQ3/RefAddr/1/Encoding=String
+
+    InputQ2/RefAddr/1/Encoding=String
+
+    InputQ/RefAddr/4/Content=1208
+
+    InputQ2/RefAddr/5/Type=TC
+
+    CF1/RefAddr/67/Type=XMSC_WMQ_MESSAGE_SELECTION
+
+    InputQ/RefAddr/1/Content=-2
+
+    CF1/RefAddr/61/Encoding=String
+
+    CF1/RefAddr/42/Type=CL
+
+    InputQ/RefAddr/7/Encoding=String
+
+    CF1/RefAddr/94/Type=XMSC_RTT_PROXY_PORT
+
+    CF1/RefAddr/3/Type=HOST
+
+    CF1/RefAddr/27/Encoding=String
+
+    CF1/RefAddr/124/Content=5000
+
+    CF1/RefAddr/9/Encoding=String
+
+    CF1/RefAddr/10/Encoding=String
+
+    CF1/RefAddr/109/Type=XMSC_WMQ_STATUS_REFRESH_INTERVAL
+
+    InputQ/RefAddr/2/Encoding=String
+
+    CF1/RefAddr/64/Content=0
+
+    InputQ3/RefAddr/14/Type=RAALD
+
+    CF1/RefAddr/61/Content=SYSTEM.BROKER.CONTROL.QUEUE
+
+    CF1/RefAddr/4/Encoding=String
+
+    InputQ3/RefAddr/4/Content=1208
+
+    CF1/RefAddr/17/Type=UCP
+
+    InputQ2/RefAddr/16/Type=QU
+
+    CF1/RefAddr/89/Encoding=String
+
+    InputQ3/RefAddr/1/Content=-2
+
+    InputQ/RefAddr/17/Type=QMGR
+
+    InputQ3/RefAddr/15/Encoding=String
+
+    CF1/RefAddr/72/Encoding=String
+
+    CF1/RefAddr/11/Content=0
+
+    CF1/RefAddr/57/Content=0
+
+    CF1/RefAddr/38/Encoding=String
+
+    InputQ3/RefAddr/10/Encoding=String
+
+    CF1/RefAddr/21/Encoding=String
+
+    CF1/RefAddr/123/Type=XMSC_WMQ_CF_DESCRIPTION
+
+    CF1/RefAddr/29/Type=CRSHOSTS
+
+    CF1/RefAddr/83/Content=7
+
+    CF1/RefAddr/108/Encoding=String
+
+    CF1/RefAddr/56/Type=BVERU
+
+    CF1/RefAddr/80/Content=SYSTEM.BROKER.DEFAULT.STREAM
+
+    CF1/RefAddr/31/Type=TQPFX
+
+    CF1/RefAddr/83/Encoding=String
+
+    CF1/RefAddr/83/Type=version
+
+    InputQ/RefAddr/10/Content=false
+
+    CF1/RefAddr/49/Encoding=String
+
+    CF1/RefAddr/103/Encoding=String
+
+    CF1/RefAddr/79/Content=1
+
+    InputQ3/RefAddr/21/Encoding=String
+
+    CF1/RefAddr/30/Content=SYSTEM.DEFAULT.MODEL.QUEUE
+
+    CF1/RefAddr/32/Encoding=String
+
+    InputQ/RefAddr/9/Content=2
+
+    CF1/RefAddr/76/Content=SYSTEM.JMS.ND.CC.SUBSCRIBER.QUEUE
+
+    InputQ/RefAddr/3/Type=PER
+
+    CF1/RefAddr/110/Type=XMSC_WMQ_CCDTURL
+
+    InputQ2/RefAddr/6/Type=ENC
+
+    CF1/RefAddr/26/Content=1
+
+    CF1/RefAddr/68/Type=XMSC_WMQ_CONNECTION_TAG
+
+    CF1/RefAddr/43/Type=CLINT
+
+    CF1/RefAddr/23/Content=
+
+    InputQ2/RefAddr/8/Content=0
+
+    CF1/RefAddr/94/Encoding=String
+
+    CF1/RefAddr/95/Type=XMSC_WMQ_HEADER_COMP
+
+    InputQ2/RefAddr/14/Encoding=String
+
+    CF1/RefAddr/4/Type=PORT
+
+    CF1/RefAddr/70/Type=XMSC_ASYNC_EXCEPTIONS
+
+    InputQ2/RefAddr/5/Content=0
+
+    CF1/RefAddr/114/Encoding=String
+
+    InputQ3/RefAddr/15/Content=-1
+
+    InputQ2/RefAddr/15/Content=-1
+
+    InputQ3/RefAddr/9/Content=2
+
+    CF1/RefAddr/4/Content=1414
+
+    CF1/RefAddr/43/Encoding=String
+
+    InputQ3/RefAddr/15/Type=PAALD
+
+    InputQ2/RefAddr/12/Content=0
+
+    InputQ3/RefAddr/12/Content=0
+
+    CF1/RefAddr/19/Content=unspecified
+
+    CF1/RefAddr/1/Content=1
+
+    InputQ2/RefAddr/17/Type=QMGR
+
+    CF1/RefAddr/95/Content=[0]
+
+    InputQ/RefAddr/18/Type=UMA
+
+    InputQ3/RefAddr/0/Type=VER
+
+    CF1/RefAddr/92/Content=0
+
+    CF1/RefAddr/102/Content=SYSTEM.DEFAULT.MODEL.QUEUE
+
+    InputQ/RefAddr/20/Type=RTOST
+
+    InputQ/RefAddr/22/Content=1
+
+    CF1/RefAddr/125/Encoding=String
+
+    CF1/RefAddr/42/Content=1
+
+    InputQ3/RefAddr/6/Encoding=String
+
+    InputQ2/RefAddr/6/Encoding=String
+
+    CF1/RefAddr/88/Content=true
+
+    InputQ2/RefAddr/20/Encoding=String
+
+    InputQ/RefAddr/18/Content=REPORT
+
+    CF1/RefAddr/124/Type=XMSC_WMQ_POLLING_INTERVAL
+
+    CF1/RefAddr/66/Encoding=String
+
+    CF1/RefAddr/120/Encoding=String
+
+    InputQ/RefAddr/15/Content=-1
+
+    CF1/RefAddr/38/Content=0
+
+    CF1/RefAddr/57/Type=XMSC_WMQ_SSL_KEY_RESETCOUNT
+
+    CF1/RefAddr/32/Type=MRET
+
+    CF1/RefAddr/15/Encoding=String
+
+    CF1/RefAddr/35/Content=SYSTEM.JMS.ND.SUBSCRIBER.QUEUE
+
+    CF1/RefAddr/84/Type=XMSC_WMQ_SSL_CERT_STORES_STR
+
+    InputQ/RefAddr/17/Encoding=String
+
+    CF1/RefAddr/121/Content=819
+
+    InputQ/RefAddr/4/Type=CCS
+
+    InputQ/RefAddr/12/Encoding=String
+
+    InputQ3/RefAddr/0/Encoding=String
+
+    CF1/RefAddr/77/Encoding=String
+
+    CF1/RefAddr/111/Type=XMSC_WMQ_CLEANUP_LEVEL
+
+    InputQ2/RefAddr/7/Type=FIQ
+
+    CF1/RefAddr/69/Type=XMSC_WMQ_PROCESS_DURATION
+
+    CF1/RefAddr/60/Encoding=String
+
+    InputQ/RefAddr/6/Encoding=String
+
+    CF1/RefAddr/44/Type=CLS
+
+    CF1/RefAddr/96/Type=XMSC_WMQ_CLONE_SUPPORT
+
+    CF1/RefAddr/26/Encoding=String
+
+    CF1/RefAddr/114/Content=20
+
+    CF1/RefAddr/5/Type=CHAN
+
+    CF1/RefAddr/8/Encoding=String
+
+    CF1/RefAddr/71/Type=XMSC_WMQ_MSG_BATCH_SIZE
+
+    InputQ/RefAddr/1/Encoding=String
+
+    CF1/RefAddr/54/Content=null
+
+    InputQ3/RefAddr/16/Type=QU
+
+    CF1/RefAddr/3/Encoding=String
+
+    InputQ2/RefAddr/18/Type=UMA
+
+    CF1/RefAddr/88/Encoding=String
+
+    InputQ3/RefAddr/14/Encoding=String
+
+    InputQ/RefAddr/19/Type=UMR
+
+    InputQ3/RefAddr/1/Type=EXP
+
+    CF1/RefAddr/71/Encoding=String
+
+    InputQ/RefAddr/21/Type=RCCS
+
+    CF1/RefAddr/37/Encoding=String
+
+    CF1/RefAddr/20/Encoding=String
+---
+# For BarAuth (empty creds)
+apiVersion: appconnect.ibm.com/v1beta1
+kind: Configuration
+metadata:
+  name: ace-barauth
+  namespace: demo
+spec:
+  data: eyJhdXRoVHlwZSI6IkJBU0lDX0FVVEgiLCJjcmVkZW50aWFscyI6eyJ1c2VybmFtZSI6IiIsInBhc3N3b3JkIjoiIn19Cgo=
+  description: Authentication for GitHub
+  type: barauth
+---
+apiVersion: appconnect.ibm.com/v1beta1
+kind: IntegrationRuntime
+metadata:
+  name: ace-jms-backout
+  namespace: demo
+spec:
+  license:
+    accept: true
+    license: L-SEWB-GH63KR
+    use: CloudPakForIntegrationNonProductionFREE
+  routes:
+    disabled: true
+  flowType:
+    toolkitFlow: true
+  dashboardUsers:
+    bypassGenerate: true
+  template:
+    spec:
+      containers:
+        - resources:
+            requests:
+              cpu: 300m
+              memory: 368Mi
+          name: runtime
+          volumeMounts:
+            - name: bindings
+              mountPath: /home/aceuser/jms
+      volumes: 
+        - name: bindings   
+          configMap: 
+             name: jms.bindings
+  logFormat: basic
+  barURL:
+    - 'https://github.com/bpaskin/ACE-JMS-Backout/raw/main/ace-jms-backout/GeneratedBarFiles/ace-jms-backoutproject.generated.bar'
+  configurations:
+   - ace-barauth
+  defaultNetworkPolicy:
+    enabled: true
+  replicas: 1
+  version: 12.0.9.0-r3
+  defaultAppName: ace-jms-backout
+  ... 
+
