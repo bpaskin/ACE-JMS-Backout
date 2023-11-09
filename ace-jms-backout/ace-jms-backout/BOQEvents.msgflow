@@ -6,17 +6,17 @@
     <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/ace-jms-backout/icons/full/obj16/BOQEvents.gif"/>
     <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/ace-jms-backout/icons/full/obj30/BOQEvents.gif"/>
     <composition>
-      <nodes xmi:type="ComIbmJMSClientInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="30,10" sourceQueueName="InputQ2" locationJndiBindings="file:///home/aceuser/jms" connectionFactoryName="CF1" backoutDestination="InputQ3" transactionMode="yes">
+      <nodes xmi:type="ComIbmJMSClientInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="10,10" sourceQueueName="InputQ2" locationJndiBindings="file:///home/aceuser/jms" connectionFactoryName="CF1" backoutDestination="InputQ3" messageDomainProperty="BLOB" transactionMode="yes">
         <translation xmi:type="utility:ConstantString" string="BOQ Process"/>
       </nodes>
-      <nodes xmi:type="ComIbmJMSClientOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="450,10" destinationQueueName="InputQ3" locationJndiBindings="file:///home/aceuser/jms" connectionFactoryName="CF1" transactionMode="yes">
+      <nodes xmi:type="ComIbmJMSClientOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="250,70" destinationQueueName="InputQ3" locationJndiBindings="file:///home/aceuser/jms" connectionFactoryName="CF1" transactionMode="yes" validateMaster="none">
         <translation xmi:type="utility:ConstantString" string="Work Queue"/>
       </nodes>
-      <nodes xmi:type="ComIbmFileOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="250,10" outputDirectory="/tmp" outputFilename="errors.log" outputMode="append">
+      <nodes xmi:type="ComIbmFileOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="250,10" outputDirectory="/tmp" outputFilename="errors.log" writeMode="writeInPlace" outputMode="append">
         <translation xmi:type="utility:ConstantString" string="File Output"/>
       </nodes>
-      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
       <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
     </composition>
     <propertyOrganizer/>
     <stickyBoard/>
